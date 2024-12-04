@@ -119,7 +119,9 @@ class MovieDetailPage extends StatelessWidget {
                       BlocBuilder<MovieDetailBloc, MovieDetailState>(
                           builder: (context, state) {
                         return switch (state) {
-                          MoviesSimilarLoading() => const GridLoading(),
+                          MoviesSimilarLoading() => const GridLoading(
+                              isSimilar: true,
+                            ),
                           MoviesSimilarSuccess() => GridMovieSection(
                               movies: state.movies,
                               isSimilar: true,
@@ -131,7 +133,9 @@ class MovieDetailPage extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 16,)
+                const SizedBox(
+                  height: 16,
+                )
               ],
             ),
           ),

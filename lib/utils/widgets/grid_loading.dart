@@ -2,11 +2,14 @@ import 'package:awesome_app/utils/widgets/item_grid_loading.dart';
 import 'package:flutter/cupertino.dart';
 
 class GridLoading extends StatelessWidget {
-  const GridLoading({super.key});
+  const GridLoading({super.key, this.isSimilar});
+
+  final bool? isSimilar;
 
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
+      shrinkWrap: isSimilar ?? false,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
