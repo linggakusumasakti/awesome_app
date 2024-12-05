@@ -6,10 +6,9 @@ import 'package:http/http.dart' as http;
 import '../../utils/constants.dart';
 
 class MovieApiClient {
-  MovieApiClient({http.Client? httpClient})
-      : _httpClient = httpClient ?? http.Client();
+  MovieApiClient({required this.httpClient});
 
-  final http.Client _httpClient;
+  final http.Client httpClient;
 
   final headers = {
     'Authorization': apiKey,
@@ -18,7 +17,7 @@ class MovieApiClient {
 
   Future<List<Movie>> getMovies({int? page = 1}) async {
     final url = Uri.https(baseUrl, '/3/movie/now_playing', {'page': '$page'});
-    final response = await _httpClient.get(
+    final response = await httpClient.get(
       url,
       headers: headers,
     );
@@ -33,7 +32,7 @@ class MovieApiClient {
 
   Future<List<Movie>> getSimilarMovies(int id) async {
     final url = Uri.https(baseUrl, '/3/movie/$id/similar');
-    final response = await _httpClient.get(
+    final response = await httpClient.get(
       url,
       headers: headers,
     );
