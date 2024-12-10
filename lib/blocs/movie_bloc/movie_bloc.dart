@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:awesome_app/data/api/movie_exception.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/repositories/movie_repository.dart';
@@ -21,8 +24,10 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
         emit(MovieLoading());
         final movies = await movieRepository.getMovies(page: page);
         emit(MovieGridSuccess(movies: movies));
-      } catch (e) {
-        emit(MovieError(text: e.toString()));
+      } on MovieException catch (e) {
+        emit(MovieError(text: e.message));
+      } on SocketException {
+        emit(const MovieError(text: 'No Internet connection'));
       }
     });
 

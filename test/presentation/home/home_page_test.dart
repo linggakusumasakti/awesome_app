@@ -53,10 +53,13 @@ void main() {
   });
 
   testWidgets('should display error', (WidgetTester tester) async {
-    when(() => movieBloc.state)
-        .thenReturn(const MovieError(text: 'Fail loaded movies'));
-    final error = find.text('Fail loaded movies');
+    whenListen(
+      movieBloc,
+      Stream.fromIterable([const MovieError(text: 'Failed to load movies')]),
+      initialState: MovieInitial(),
+    );
     await tester.pumpWidget(wrapWithBloc(const HomePage(), movieBloc));
-    expect(error, findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsOneWidget);
   });
 }

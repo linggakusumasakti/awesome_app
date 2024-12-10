@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:awesome_app/data/api/movie_exception.dart';
 import 'package:awesome_app/data/models/movie.dart';
 import 'package:http/http.dart' as http;
 
@@ -26,7 +27,8 @@ class MovieApiClient {
       final List<dynamic> results = data['results'];
       return results.map((json) => Movie.fromJson(json)).toList();
     } else {
-      throw Exception('Failed to load movies: ${response.statusCode}');
+      throw MovieException(
+          message: json.decode(response.body)['status_message']);
     }
   }
 

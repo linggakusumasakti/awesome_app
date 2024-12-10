@@ -1,6 +1,7 @@
 import 'package:awesome_app/blocs/movie_bloc/movie_bloc.dart';
 import 'package:awesome_app/blocs/movie_bloc/movie_event.dart';
 import 'package:awesome_app/blocs/movie_bloc/movie_state.dart';
+import 'package:awesome_app/data/api/movie_exception.dart';
 import 'package:awesome_app/data/models/movie.dart';
 import 'package:awesome_app/data/repositories/movie_repository.dart';
 import 'package:bloc_test/bloc_test.dart';
@@ -46,13 +47,13 @@ void main() {
       'emits [MovieError] when MovieGrid event fails',
       build: () {
         when(() => mockMovieRepository.getMovies(page: 1))
-            .thenThrow(Exception('Failed to fetch movies'));
+            .thenThrow(const MovieException(message: 'Failed to fetch movies'));
         return movieBloc;
       },
       act: (bloc) => bloc.add(MovieGrid()),
       expect: () => [
         MovieLoading(),
-        const MovieError(text: 'Exception: Failed to fetch movies'),
+        const MovieError(text: 'Failed to fetch movies'),
       ],
       verify: (_) {
         verify(() => mockMovieRepository.getMovies(page: 1)).called(1);

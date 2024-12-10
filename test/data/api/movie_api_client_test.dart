@@ -1,4 +1,5 @@
 import 'package:awesome_app/data/api/movie_api_client.dart';
+import 'package:awesome_app/data/api/movie_exception.dart';
 import 'package:awesome_app/data/models/movie.dart';
 import 'package:awesome_app/utils/constants.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -49,11 +50,12 @@ void main() {
     test('throws movies failure on non-200 response', () async {
       final response = MockResponse();
       when(() => response.statusCode).thenReturn(400);
+      when(() => response.body).thenReturn('{"status_message": "Invalid API key: You must be granted a valid key."}');
       when(() => httpClient.get(any(), headers: any(named: 'headers')))
           .thenAnswer((_) async => response);
       expect(
         () async => movieApiClient.getMovies(),
-        throwsA(isA<Exception>()),
+        throwsA(isA<MovieException>()),
       );
     });
 

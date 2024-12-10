@@ -5,6 +5,7 @@ import 'package:awesome_app/presentation/home/widgets/grid_movie_section.dart';
 import 'package:awesome_app/presentation/home/widgets/item_pop_up_menu.dart';
 import 'package:awesome_app/presentation/home/widgets/list_movie_section.dart';
 import 'package:awesome_app/utils/widgets/grid_loading.dart';
+import 'package:awesome_app/utils/widgets/my_alert_dialog.dart';
 import 'package:awesome_app/utils/widgets/my_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -70,21 +71,30 @@ class HomePage extends StatelessWidget {
           }
           return Future.value();
         },
-        child: BlocBuilder<MovieBloc, MovieState>(builder: (context, state) {
-          return switch (state) {
-            MovieLoading() => const GridLoading(),
-            MovieGridSuccess() => GridMovieSection(
-                controller: scrollController,
-                movies: state.movies,
-              ),
-            MovieListSuccess() => ListMovieSection(
-                controller: scrollController,
-                movies: state.movies,
-              ),
-            MovieError() => Text(state.text),
-            _ => const SizedBox()
-          };
-        }),
+        child: BlocListener<MovieBloc, MovieState>(
+          listener: (context, state) {
+            if (state is MovieError) {
+              showMyDialog(context, state.text, onPressed: () {
+                context.read<MovieBloc>().add(MovieGrid());
+                Navigator.of(context).pop();
+              });
+            }
+          },
+          child: BlocBuilder<MovieBloc, MovieState>(builder: (context, state) {
+            return switch (state) {
+              MovieLoading() => const GridLoading(),
+              MovieGridSuccess() => GridMovieSection(
+                  controller: scrollController,
+                  movies: state.movies,
+                ),
+              MovieListSuccess() => ListMovieSection(
+                  controller: scrollController,
+                  movies: state.movies,
+                ),
+              _ => const SizedBox()
+            };
+          }),
+        ),
       ),
     );
   }
