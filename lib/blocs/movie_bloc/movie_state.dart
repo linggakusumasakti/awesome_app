@@ -2,54 +2,35 @@ import 'package:equatable/equatable.dart';
 
 import '../../data/models/movie.dart';
 
-sealed class MovieState extends Equatable {
-  const MovieState();
-
-  @override
-  List<Object?> get props => [];
+enum MovieStatus {
+  initial,
+  loading,
+  gridLoaded,
+  listLoaded,
+  error,
 }
 
-final class MovieInitial extends MovieState {
-  @override
-  List<Object> get props => [];
-}
-
-final class MovieLoading extends MovieState {
-  @override
-  List<Object?> get props => [];
-}
-
-final class MovieError extends MovieState {
-  const MovieError({required this.text});
-
-  final String text;
-
-  @override
-  List<Object?> get props => [text];
-}
-
-final class MovieGridSuccess extends MovieState {
-  const MovieGridSuccess({required this.movies});
-
+class MovieState extends Equatable {
+  final MovieStatus movieStatus;
   final List<Movie> movies;
+  final String errorMessage;
 
-  MovieGridSuccess copyWith({required List<Movie> movies}) {
-    return MovieGridSuccess(movies: movies);
+  const MovieState(
+      {required this.movieStatus,
+      required this.movies,
+      required this.errorMessage});
+
+  static MovieState initial() => const MovieState(
+      movieStatus: MovieStatus.initial, movies: [], errorMessage: '');
+
+  MovieState copyWith(
+      {MovieStatus? movieStatus, List<Movie>? movies, String? errorMessage}) {
+    return MovieState(
+        movieStatus: movieStatus ?? this.movieStatus,
+        movies: movies ?? this.movies,
+        errorMessage: errorMessage ?? this.errorMessage);
   }
 
   @override
-  List<Object> get props => [movies];
-}
-
-final class MovieListSuccess extends MovieState {
-  const MovieListSuccess({required this.movies});
-
-  final List<Movie> movies;
-
-  MovieListSuccess copyWith({required List<Movie> movies}) {
-    return MovieListSuccess(movies: movies);
-  }
-
-  @override
-  List<Object> get props => [movies];
+  List<Object?> get props => [movieStatus, movies];
 }

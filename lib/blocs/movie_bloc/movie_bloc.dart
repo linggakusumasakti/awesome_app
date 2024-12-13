@@ -12,62 +12,72 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
 
   int page = 1;
 
-  MovieBloc({required this.movieRepository}) : super(MovieInitial()) {
+  MovieBloc({required this.movieRepository}) : super(MovieState.initial()) {
     on<MovieGrid>((event, emit) async {
-      if (state is MovieListSuccess) {
-        final currentState = state as MovieListSuccess;
-        emit(MovieGridSuccess(movies: List.of(currentState.movies)));
+      if (state.movieStatus == MovieStatus.listLoaded) {
+        emit(state.copyWith(
+            movies: List.of(state.movies),
+            movieStatus: MovieStatus.gridLoaded));
         return;
       }
       try {
         page = 1;
-        emit(MovieLoading());
+        emit(state.copyWith(movieStatus: MovieStatus.loading));
         final movies = await movieRepository.getMovies(page: page);
-        emit(MovieGridSuccess(movies: movies));
+        emit(state.copyWith(
+            movieStatus: MovieStatus.gridLoaded, movies: movies));
       } on MovieException catch (e) {
-        emit(MovieError(text: e.message));
+        emit(state.copyWith(
+            movieStatus: MovieStatus.error, errorMessage: e.message));
       } on SocketException {
-        emit(const MovieError(text: 'No Internet connection'));
+        emit(state.copyWith(
+            movieStatus: MovieStatus.error,
+            errorMessage: 'No Internet connection'));
       }
     });
 
     on<MovieList>((event, emit) async {
-      if (state is MovieGridSuccess) {
-        final currentState = state as MovieGridSuccess;
-        emit(MovieListSuccess(movies: List.of(currentState.movies)));
+      if (state.movieStatus == MovieStatus.gridLoaded) {
+        emit(state.copyWith(
+            movies: List.of(state.movies),
+            movieStatus: MovieStatus.listLoaded));
         return;
       }
       try {
         page = 1;
-        emit(MovieLoading());
+        emit(state.copyWith(movieStatus: MovieStatus.loading));
         final movies = await movieRepository.getMovies(page: page);
-        emit(MovieListSuccess(movies: movies));
-      } catch (e) {
-        emit(MovieError(text: e.toString()));
+        emit(state.copyWith(
+            movieStatus: MovieStatus.listLoaded, movies: movies));
+      } on MovieException catch (e) {
+        emit(state.copyWith(
+            movieStatus: MovieStatus.error, errorMessage: e.message));
+      } on SocketException {
+        emit(state.copyWith(
+            movieStatus: MovieStatus.error,
+            errorMessage: 'No Internet connection'));
       }
     });
 
     on<LoadMoreMovieGrid>((event, emit) async {
-      final currentState = state as MovieGridSuccess;
       try {
         page++;
         final movies = await movieRepository.getMovies(page: page);
-        emit(currentState.copyWith(
-            movies: List.of(currentState.movies)..addAll(movies)));
+        emit(state.copyWith(movies: List.of(state.movies)..addAll(movies)));
       } catch (e) {
-        emit(MovieError(text: e.toString()));
+        emit(state.copyWith(
+            errorMessage: e.toString(), movieStatus: MovieStatus.error));
       }
     });
 
     on<LoadMoreListMovie>((event, emit) async {
-      final currentState = state as MovieListSuccess;
       try {
         page++;
         final movies = await movieRepository.getMovies(page: page);
-        emit(currentState.copyWith(
-            movies: List.of(currentState.movies)..addAll(movies)));
+        emit(state.copyWith(movies: List.of(state.movies)..addAll(movies)));
       } catch (e) {
-        emit(MovieError(text: e.toString()));
+        emit(state.copyWith(
+            errorMessage: e.toString(), movieStatus: MovieStatus.error));
       }
     });
   }

@@ -19,7 +19,8 @@ class HomePage extends StatelessWidget {
     scrollController.addListener(() {
       if (scrollController.position.pixels >=
           (0.80 * scrollController.position.maxScrollExtent)) {
-        if (context.read<MovieBloc>().state is MovieGridSuccess) {
+        if (context.read<MovieBloc>().state.movieStatus ==
+            MovieStatus.gridLoaded) {
           context.read<MovieBloc>().add(LoadMoreMovieGrid());
         } else {
           context.read<MovieBloc>().add(LoadMoreListMovie());
@@ -35,12 +36,12 @@ class HomePage extends StatelessWidget {
               onSelected: (value) {
                 switch (value) {
                   case 'listView':
-                    if (state is! MovieListSuccess) {
+                    if (state.movieStatus == MovieStatus.gridLoaded) {
                       context.read<MovieBloc>().add(MovieList());
                     }
                     break;
                   case 'gridView':
-                    if (state is! MovieGridSuccess) {
+                    if (state.movieStatus == MovieStatus.listLoaded) {
                       context.read<MovieBloc>().add(MovieGrid());
                     }
                     break;
@@ -58,13 +59,13 @@ class HomePage extends StatelessWidget {
               ],
             );
           })
-          // IconButton(onPressed: () {}, icon: const Icon(Icons.grid_3x3))
         ],
       ),
       backgroundColor: Colors.white,
       body: RefreshIndicator(
         onRefresh: () {
-          if (context.read<MovieBloc>().state is MovieGridSuccess) {
+          if (context.read<MovieBloc>().state.movieStatus ==
+              MovieStatus.gridLoaded) {
             context.read<MovieBloc>().add(MovieGrid());
           } else {
             context.read<MovieBloc>().add(MovieList());
@@ -73,21 +74,21 @@ class HomePage extends StatelessWidget {
         },
         child: BlocListener<MovieBloc, MovieState>(
           listener: (context, state) {
-            if (state is MovieError) {
-              showMyDialog(context, state.text, onPressed: () {
+            if (state.movieStatus == MovieStatus.error) {
+              showMyDialog(context, state.errorMessage, onPressed: () {
                 context.read<MovieBloc>().add(MovieGrid());
                 Navigator.of(context).pop();
               });
             }
           },
           child: BlocBuilder<MovieBloc, MovieState>(builder: (context, state) {
-            return switch (state) {
-              MovieLoading() => const GridLoading(),
-              MovieGridSuccess() => GridMovieSection(
+            return switch (state.movieStatus) {
+              MovieStatus.loading => const GridLoading(),
+              MovieStatus.gridLoaded => GridMovieSection(
                   controller: scrollController,
                   movies: state.movies,
                 ),
-              MovieListSuccess() => ListMovieSection(
+              MovieStatus.listLoaded => ListMovieSection(
                   controller: scrollController,
                   movies: state.movies,
                 ),

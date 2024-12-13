@@ -30,7 +30,7 @@ void main() {
   });
 
   testWidgets('should display grid loading', (WidgetTester tester) async {
-    when(() => movieBloc.state).thenReturn(MovieLoading());
+    when(() => movieBloc.state).thenReturn(const MovieState(movieStatus: MovieStatus.loading, movies: [], errorMessage: ''));
     final gridLoading = find.byType(GridLoading);
     await tester.pumpWidget(wrapWithBloc(const HomePage(), movieBloc));
     expect(gridLoading, findsOneWidget);
@@ -38,7 +38,7 @@ void main() {
 
   testWidgets('should display movie grid', (WidgetTester tester) async {
     when(() => movieBloc.state)
-        .thenReturn(const MovieGridSuccess(movies: <Movie>[]));
+        .thenReturn(const MovieState(movieStatus: MovieStatus.gridLoaded, movies: <Movie>[], errorMessage: ''));
     final gridMovie = find.byType(GridMovieSection);
     await tester.pumpWidget(wrapWithBloc(const HomePage(), movieBloc));
     expect(gridMovie, findsOneWidget);
@@ -46,7 +46,7 @@ void main() {
 
   testWidgets('should display movie list', (WidgetTester tester) async {
     when(() => movieBloc.state)
-        .thenReturn(const MovieListSuccess(movies: <Movie>[]));
+        .thenReturn(const MovieState(movieStatus: MovieStatus.listLoaded, movies: <Movie>[], errorMessage: ''));
     final listMovie = find.byType(ListMovieSection);
     await tester.pumpWidget(wrapWithBloc(const HomePage(), movieBloc));
     expect(listMovie, findsOneWidget);
@@ -55,8 +55,8 @@ void main() {
   testWidgets('should display error', (WidgetTester tester) async {
     whenListen(
       movieBloc,
-      Stream.fromIterable([const MovieError(text: 'Failed to load movies')]),
-      initialState: MovieInitial(),
+      Stream.fromIterable([const MovieState(movieStatus: MovieStatus.error, movies: [], errorMessage: 'Failed to load movies')]),
+      initialState: const MovieState(movieStatus: MovieStatus.initial, movies: [], errorMessage: ''),
     );
     await tester.pumpWidget(wrapWithBloc(const HomePage(), movieBloc));
     await tester.pumpAndSettle();

@@ -31,20 +31,29 @@ void main() {
           releaseDate: '2024-11-27')
     ];
     blocTest<MovieBloc, MovieState>(
-        'emits [MovieLoading, MovieGridSuccess] when MovieGrid event is added',
+        'emits loading, gridLoaded when MovieGrid event is added',
         build: () {
           when(() => mockMovieRepository.getMovies(page: 1))
               .thenAnswer((_) async => mockMovies);
           return movieBloc;
         },
         act: (bloc) => bloc.add(MovieGrid()),
-        expect: () => [MovieLoading(), MovieGridSuccess(movies: mockMovies)],
+        expect: () => [
+              const MovieState(
+                  movieStatus: MovieStatus.loading,
+                  movies: [],
+                  errorMessage: ''),
+              MovieState(
+                  movieStatus: MovieStatus.gridLoaded,
+                  movies: mockMovies,
+                  errorMessage: ''),
+            ],
         verify: (_) {
           verify(() => mockMovieRepository.getMovies(page: 1)).called(1);
         });
 
     blocTest<MovieBloc, MovieState>(
-      'emits [MovieError] when MovieGrid event fails',
+      'emits error when MovieGrid event fails',
       build: () {
         when(() => mockMovieRepository.getMovies(page: 1))
             .thenThrow(const MovieException(message: 'Failed to fetch movies'));
@@ -52,8 +61,11 @@ void main() {
       },
       act: (bloc) => bloc.add(MovieGrid()),
       expect: () => [
-        MovieLoading(),
-        const MovieError(text: 'Failed to fetch movies'),
+        const MovieState(
+            movieStatus: MovieStatus.loading,
+            movies: [],
+            errorMessage: ''),
+        const MovieState(movieStatus: MovieStatus.error, movies: [], errorMessage: 'Failed to fetch movies'),
       ],
       verify: (_) {
         verify(() => mockMovieRepository.getMovies(page: 1)).called(1);
